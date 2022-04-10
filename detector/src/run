@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd Yolov5_DeepSort_Pytorch
+
+python3 track.py --source ../test.m4v
+

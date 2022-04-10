@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  estimator:
+    image: drpilman/estimator
+    build: .
+    environment:
+      iscuda: 1
+  estimator-test:
+    depends_on:
+      - estimator
+    build:
+      context: tests
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: [ '0' ]
+            capabilities: [ gpu ]
