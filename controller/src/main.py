@@ -35,3 +35,6 @@ def pause_tracker(str_id):
 
 def unpause_tracker(str_id):
     tracker(str_id).unpause()
+
+# ./rtsp-simple-server
+# ffmpeg -re -stream_loop -1 -i test.m4v -c copy -f rtsp rtsp://localhost:8554/mystream
