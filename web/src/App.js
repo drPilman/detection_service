@@ -9,9 +9,20 @@ import UnpauseTracker from "./components/UnpauseTracker/UnpauseTracker";
 
 
 const App = (props) => {
+    let trackersC = props.trackers.map(
+        tracker => <tr><td>{tracker.id}</td><td>{tracker.status}</td></tr>
+    )
+
     return (
         <main>
-            <ListTrackers/>
+            <table>
+                <tr>
+                    <td>id</td>
+                    <td>status</td>
+                </tr>
+                {trackersC}
+            </table>
+            {/*<ListTrackers/>*/}
             <AddTracker/>
             <RemoveTracker/>
             <PauseTracker/>
@@ -20,8 +31,11 @@ const App = (props) => {
     )
 }
 
-const mapStateToProps = (state) => ({})
+const mapStateToProps = (state) => ({
+    trackers: state.app.trackers
+})
 
-const mapDispatchToPropsObj = {}
+const mapDispatchToPropsObj = {
+}
 
 export default connect(mapStateToProps, mapDispatchToPropsObj)(App)

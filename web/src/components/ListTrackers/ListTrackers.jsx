@@ -1,6 +1,7 @@
 import React from "react";
-import {Field, reduxForm} from "redux-form";
+import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
+import {listTrackersTC} from "../../redux/app-reducer";
 
 const ListTrackersForm = (props) => {
     return (
@@ -13,8 +14,8 @@ const ListTrackersForm = (props) => {
 const ListTrackersReduxForm = reduxForm({form: 'listTrackers'})(ListTrackersForm)
 
 const ListTrackers = (props) => {
-    const onSubmit = (formData) => {
-        alert('Showing avialable trackers')
+    const onSubmit = () => {
+        props.listTrackers()
     }
     return (
         <div>
@@ -28,6 +29,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToStateObj = {
+    listTrackersTC
 }
 
 

@@ -8,7 +8,7 @@ const PauseTrackerForm = (props) => {
             <Field component={'input'}
                    name={'pauseTrackerId'}
                    placeholder={'enter id'}/>
-            <button>Pause Tracker</button>
+            <button disabled>Pause Tracker</button>
 
         </form>
     )

@@ -1,3 +1,2 @@
 docker
 fastapi
-axios

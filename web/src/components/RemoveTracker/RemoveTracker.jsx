@@ -8,7 +8,7 @@ const RemoveTrackerForm = (props) => {
             <Field component={'input'}
                    name={'removeTrackerId'}
                    placeholder={'enter id'}/>
-            <button>Remove Tracker</button>
+            <button disabled>Remove Tracker</button>
 
         </form>
     )
@@ -22,7 +22,7 @@ const RemoveTracker = (props) => {
     }
     return (
         <div>
-            <h1>Add tracker</h1>
+            <h1>Remove tracker</h1>
             <RemoveTrackerReduxForm onSubmit={onSubmit}/>
         </div>
     )

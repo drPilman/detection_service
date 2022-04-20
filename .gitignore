@@ -2,6 +2,8 @@
 ### Example user template
 web/node_modules
 web/.idea
+controller/.idea
+controller/venv
 # IntelliJ project files
 .idea
 *.iml

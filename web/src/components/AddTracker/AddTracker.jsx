@@ -1,6 +1,7 @@
 import React from "react";
 import {Field, reduxForm} from "redux-form";
 import {connect} from "react-redux";
+import {addTrackerTC} from "../../redux/app-reducer";
 
 const AddTrackerForm = (props) => {
     return (
@@ -18,7 +19,7 @@ const AddTrackerReduxForm = reduxForm({form: 'addTracker'})(AddTrackerForm)
 
 const AddTracker = (props) => {
     const onSubmit = (formData) => {
-        alert(formData.addTrackerUrl)
+        props.addTrackerTC(formData)
     }
     return (
         <div>
@@ -32,6 +33,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToStateObj = {
+    addTrackerTC
 }
 
 
