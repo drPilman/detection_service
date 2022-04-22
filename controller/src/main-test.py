@@ -1,11 +1,22 @@
 import docker
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from .models import *
 import logging
 
 app = FastAPI()
 # client = docker.from_env()
 logger = logging.getLogger(__name__)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get('/')
@@ -23,7 +34,7 @@ def add_tracker(source: RSTP_URL):
 def list_trackers():
     # containers = client.containers.list(all=True, filters={"ancestor": "drpilman/detector"})
     return {
-        'trackers': [{'full_id': container, 'status': str(container) + '.status'} for container in range(10)],
+        'trackers': [{'full_id': container, 'status': str(container) + '.status', 'isPaused': False} for container in range(10)],
         'count': 10
     }
 

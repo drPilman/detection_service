@@ -1,15 +1,12 @@
 import React from "react";
-import {Field, reduxForm} from "redux-form";
+import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
+import {pauseTrackerTC} from "../../redux/app-reducer";
 
 const PauseTrackerForm = (props) => {
     return (
         <form onSubmit={props.handleSubmit}>
-            <Field component={'input'}
-                   name={'pauseTrackerId'}
-                   placeholder={'enter id'}/>
-            <button disabled>Pause Tracker</button>
-
+            <button disabled={props.isFetching}>Pause Tracker</button>
         </form>
     )
 }
@@ -17,21 +14,18 @@ const PauseTrackerForm = (props) => {
 const PauseTrackerReduxForm = reduxForm({form: 'pauseTracker'})(PauseTrackerForm)
 
 const PauseTracker = (props) => {
-    const onSubmit = (formData) => {
-        alert(formData.pauseTrackerId)
+    const onSubmit = () => {
+        props.pauseTrackerTC(Number(props.full_id))
     }
-    return (
-        <div>
-            <h1>Pause tracker</h1>
-            <PauseTrackerReduxForm onSubmit={onSubmit}/>
-        </div>
-    )
+    return <PauseTrackerReduxForm onSubmit={onSubmit} isFetching={props.isFetching}/>
 }
 
 const mapStateToProps = (state) => ({
+    isFetching: state.app.isFetching
 })
 
 const mapDispatchToStateObj = {
+    pauseTrackerTC
 }
 
 

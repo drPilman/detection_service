@@ -6,29 +6,47 @@ import ListTrackers from "./components/ListTrackers/ListTrackers";
 import RemoveTracker from "./components/RemoveTracker/RemoveTracker";
 import PauseTracker from "./components/PauseTracker/PauseTracker";
 import UnpauseTracker from "./components/UnpauseTracker/UnpauseTracker";
+import {initializeAppTC} from "./redux/app-reducer";
 
 
-const App = (props) => {
-    let trackersC = props.trackers.map(
-        tracker => <tr><td>{tracker.id}</td><td>{tracker.status}</td></tr>
-    )
+class App extends React.Component {
+    componentDidMount() {
+        this.props.initializeAppTC()
+    }
 
-    return (
-        <main>
-            <table>
-                <tr>
-                    <td>id</td>
-                    <td>status</td>
-                </tr>
-                {trackersC}
-            </table>
-            {/*<ListTrackers/>*/}
-            <AddTracker/>
-            <RemoveTracker/>
-            <PauseTracker/>
-            <UnpauseTracker/>
-        </main>
-    )
+    render() {
+        let trackersC = this.props.trackers.map(
+            tracker => (<tr>
+                            <td>{tracker.full_id}</td>
+                            <td>{tracker.status}</td>
+                            <td>{tracker.isPaused
+                                    ? <UnpauseTracker full_id={tracker.full_id}/>
+                                    : <PauseTracker full_id={tracker.full_id}/>}
+                            </td>
+                            <td><RemoveTracker full_id={tracker.full_id} /></td>
+                        </tr>)
+
+        )
+        return (
+            <main>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>id</td>
+                            <td>status</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {trackersC}
+                    </tbody>
+                </table>
+                <AddTracker/>
+            </main>
+        )
+    }
+
 }
 
 const mapStateToProps = (state) => ({
@@ -36,6 +54,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToPropsObj = {
+    initializeAppTC
 }
 
 export default connect(mapStateToProps, mapDispatchToPropsObj)(App)

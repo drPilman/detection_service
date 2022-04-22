@@ -1,15 +1,12 @@
 import React from "react";
-import {Field, reduxForm} from "redux-form";
+import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
+import {removeTrackerTC} from "../../redux/app-reducer";
 
 const RemoveTrackerForm = (props) => {
     return (
         <form onSubmit={props.handleSubmit}>
-            <Field component={'input'}
-                   name={'removeTrackerId'}
-                   placeholder={'enter id'}/>
-            <button disabled>Remove Tracker</button>
-
+            <button disabled={props.isFetching}>Remove Tracker</button>
         </form>
     )
 }
@@ -17,21 +14,18 @@ const RemoveTrackerForm = (props) => {
 const RemoveTrackerReduxForm = reduxForm({form: 'removeTracker'})(RemoveTrackerForm)
 
 const RemoveTracker = (props) => {
-    const onSubmit = (formData) => {
-        alert(formData.removeTrackerId)
+    const onSubmit = () => {
+        props.removeTrackerTC(Number(props.full_id))
     }
-    return (
-        <div>
-            <h1>Remove tracker</h1>
-            <RemoveTrackerReduxForm onSubmit={onSubmit}/>
-        </div>
-    )
+    return <RemoveTrackerReduxForm onSubmit={onSubmit} isFetching={props.isFetching}/>
 }
 
 const mapStateToProps = (state) => ({
+    isFetching: state.app.isFetching
 })
 
 const mapDispatchToStateObj = {
+    removeTrackerTC
 }
 
 

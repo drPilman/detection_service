@@ -1,37 +1,31 @@
 import React from "react";
-import {Field, reduxForm} from "redux-form";
+import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
+import {unpauseTrackerTC} from "../../redux/app-reducer";
 
 const UnpauseTrackerForm = (props) => {
     return (
         <form onSubmit={props.handleSubmit}>
-            <Field component={'input'}
-                   name={'unpauseTrackerId'}
-                   placeholder={'enter id'}/>
-            <button disabled>Unpause Tracker</button>
-
+            <button disabled={props.isFetching}>Unpause Tracker</button>
         </form>
     )
 }
 
-const UnpauseTrackerReduxForm = reduxForm({form: 'unpauseTracker'})(UnpauseTrackerForm)
+const UnpauseTrackerReduxForm = reduxForm({form: 'pauseTracker'})(UnpauseTrackerForm)
 
 const UnpauseTracker = (props) => {
-    const onSubmit = (formData) => {
-        alert(formData.unpauseTrackerId)
+    const onSubmit = () => {
+        props.unpauseTrackerTC(Number(props.full_id))
     }
-    return (
-        <div>
-            <h1>Unpause tracker</h1>
-            <UnpauseTrackerReduxForm onSubmit={onSubmit}/>
-        </div>
-    )
+    return <UnpauseTrackerReduxForm onSubmit={onSubmit} isFetching={props.isFetching}/>
 }
 
 const mapStateToProps = (state) => ({
+    isFetching: state.app.isFetching
 })
 
 const mapDispatchToStateObj = {
+    unpauseTrackerTC
 }
 
 

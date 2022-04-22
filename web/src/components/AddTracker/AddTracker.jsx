@@ -19,7 +19,7 @@ const AddTrackerReduxForm = reduxForm({form: 'addTracker'})(AddTrackerForm)
 
 const AddTracker = (props) => {
     const onSubmit = (formData) => {
-        props.addTrackerTC(formData)
+        props.addTrackerTC(formData.addTrackerUrl)
     }
     return (
         <div>

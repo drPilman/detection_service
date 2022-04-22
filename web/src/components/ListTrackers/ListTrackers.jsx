@@ -1,7 +1,7 @@
 import React from "react";
 import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
-import {listTrackersTC} from "../../redux/app-reducer";
+// import {listTrackersTC} from "../../redux/app-reducer";
 
 const ListTrackersForm = (props) => {
     return (
@@ -29,7 +29,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToStateObj = {
-    listTrackersTC
+    // listTrackersTC
 }
 
 

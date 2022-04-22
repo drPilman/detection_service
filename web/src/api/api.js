@@ -1,9 +1,8 @@
 import * as axios from "axios";
 
-const instance = axios.create({
-    withCredentials: true
-})
-const base_url = 'https://cors-anywhere.herokuapp.com/http://127.0.0.1:8000'
+const instance = axios.create()
+const base_url = 'http://127.0.0.1:8000'
+
 export const frontAPI = {
     check() {
         return instance.get('/')
@@ -21,7 +20,7 @@ export const frontAPI = {
         return instance.post(base_url + `/pause_tracker/`, {full_id})
     },
     unpauseTracker(full_id) {
-        return instance.post(base_url + `/unpauseTracker/`, {full_id})
+        return instance.post(base_url + `/unpause_tracker/`, {full_id})
     }
 }
 
