@@ -1,11 +1,14 @@
 import docker
+import logging
 from fastapi import FastAPI, HTTPException
 from .models import *
-import logging
+from .log import log_config
 
-app = FastAPI()
+logging.config.dictConfig(log_config)
+
+app = FastAPI(debug=True)
 client = docker.from_env()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 
 @app.get('/')

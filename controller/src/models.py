@@ -9,17 +9,21 @@ class SHA_ID(BaseModel):
     full_id: str
 
 
+class Bbox(BaseModel):
+    obj_id: int
+    name: str
+    conf: float
+    xyxy: list[int, int, int, int]
+
+
 class ResultData(BaseModel):
     """
     {идентификатор обработчика,
     номер фрейма,
     время обработки,
-    [[id, class ,probability, x, y, w, h], [id, class, probability, x, y, w, h], ...]}
+    [Bbox, Bbox, ...]}
     """
-    full_id: str
+    container_id: str
     frame_id: int
     time_spent: float
-    detections: list[list[int, int, float, float, float, float, float]]
-
-    def __repr__(self):
-        return f"{self.full_id} {self.frame_id} detect {'|'.join(','.join(str(x)) for x in self.detections)}"
+    detections: list[Bbox]
