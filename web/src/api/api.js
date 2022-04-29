@@ -8,19 +8,20 @@ export const frontAPI = {
         return instance.get('/')
     },
     addTracker(url) {
-        return instance.post(base_url + '/add_tracker/', {url})
+        return instance.post(base_url + '/add_tracker', {url:url})
     },
     listTrackers() {
-        return instance.post(base_url + `/list_trackers/`)
+        return instance.post(base_url + `/list_trackers`)
     },
     removeTracker(full_id) {
-        return instance.post(base_url + `/remove_tracker/`, {full_id})
+        console.log(full_id)
+        return instance.post(base_url + `/remove_tracker`, {full_id:full_id})
     },
     pauseTracker(full_id) {
-        return instance.post(base_url + `/pause_tracker/`, {full_id})
+        return instance.post(base_url + `/pause_tracker`, {full_id:full_id})
     },
     unpauseTracker(full_id) {
-        return instance.post(base_url + `/unpause_tracker/`, {full_id})
+        return instance.post(base_url + `/unpause_tracker`, {full_id:full_id})
     }
 }
 

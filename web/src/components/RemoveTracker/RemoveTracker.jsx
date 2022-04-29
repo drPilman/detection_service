@@ -15,7 +15,7 @@ const RemoveTrackerReduxForm = reduxForm({form: 'removeTracker'})(RemoveTrackerF
 
 const RemoveTracker = (props) => {
     const onSubmit = () => {
-        props.removeTrackerTC(Number(props.full_id))
+        props.removeTrackerTC(props.full_id)
     }
     return <RemoveTrackerReduxForm onSubmit={onSubmit} isFetching={props.isFetching}/>
 }
