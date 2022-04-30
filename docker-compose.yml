@@ -1,19 +1,25 @@
 version: "3.9"
 services:
-  estimator:
-    image: drpilman/estimator
-    build: .
-    environment:
-      iscuda: 1
-  estimator-test:
-    depends_on:
-      - estimator
+  controller:
+    image: drpilman/controller
     build:
-      context: tests
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            device_ids: [ '0' ]
-            capabilities: [ gpu ]
+      context: controller
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  rtsp_test_server:
+    image: drpilman/testvideo
+    ports:
+      - "8554:8554"
+    build:
+      context: rtsp_server
+  web:
+    image: drpilman/web
+    build:
+      context: web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - controller
+      - rtsp_test_server

@@ -1,3 +1,3 @@
 docker
-fastapi
-uvicorn[standard]
+#fastapi
+#uvicorn[standard]
