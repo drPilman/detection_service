@@ -6,6 +6,8 @@ controller/.idea
 controller/venv
 # IntelliJ project files
 .idea
+*/.idea
+detector/src/.idea
 *.iml
 out
 gen

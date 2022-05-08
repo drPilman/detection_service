@@ -47,23 +47,23 @@ def list_trackers():
 
 
 @app.post('/tracker_info')
-def tracker_info(tracker: SHA_ID):
+def tracker_info(tracker: Tracker):
     return {'msg': 'not implemented yet'}
 
 
 @app.post('/remove_tracker')
-def remove_tracker(tracker: SHA_ID):
+def remove_tracker(tracker: Tracker):
     return True
     # get_tracker(tracker.full_id).remove(force=True)
 
 
 @app.post('/pause_tracker')
-def pause_tracker(tracker: SHA_ID):
+def pause_tracker(tracker: Tracker):
     # get_tracker(tracker.full_id).pause()
     return True
 
 @app.post('/unpause_tracker')
-def unpause_tracker(tracker: SHA_ID):
+def unpause_tracker(tracker: Tracker):
     return True
     # get_tracker(tracker.full_id).unpause()
 
