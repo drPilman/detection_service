@@ -8,7 +8,7 @@
 <body>
     <img id="frame" src="">
     <script>
-        let ws = new WebSocket("ws://drpilman.ga:8000/ws");
+        let ws = new WebSocket("ws://drpilman.ga:8000/ws/{{id}}");
         let image = document.getElementById("frame");
         image.onload = function () {
             URL.revokeObjectURL(this.src); // release the blob URL once the image is loaded

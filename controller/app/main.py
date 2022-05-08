@@ -1,7 +1,7 @@
 import asyncio
 import docker
 import logging
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, Response
 from websockets.exceptions import ConnectionClosedOK
 
 from starlette.middleware.cors import CORSMiddleware
@@ -91,46 +91,42 @@ def add_tracker(source: RSTP_URL, request: Request):
 def list_trackers():
     containers = client.containers.list(
         all=True, filters={"ancestor": "drpilman/detector"})
-
-    return {
-        'trackers': [{
-            'full_id': trackers.r[container.id],
-            'status': container.status
-        } for container in containers],
-        'count':
-        len(containers)
-    }
+    ids = [{
+        'full_id': trackers.r[container.id],
+        'status': container.status
+    } for container in containers if container.id in trackers.r]
+    return {'trackers': ids, 'count': len(ids)}
 
 
-def get_tracker(str_id):
+def get_tracker(id):
     try:
-        return client.containers.get(trackers[str_id])
+        return client.containers.get(trackers[id])
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Item not found")
 
 
 @app.post('/tracker_info')
-def tracker_info(tracker: SHA_ID):
+def tracker_info(tracker: Tracker):
     return {'msg': 'not implemented yet'}
 
 
 @app.post('/remove_tracker')
-def remove_tracker(tracker: SHA_ID):
-    tracker = get_tracker(tracker.full_id)
+def remove_tracker(tracker: Tracker):
+    tracker = get_tracker(tracker.id)
     if tracker:
         tracker.remove(force=True)
 
 
 @app.post('/pause_tracker')
-def pause_tracker(tracker: SHA_ID):
-    tracker = get_tracker(tracker.full_id)
+def pause_tracker(tracker: Tracker):
+    tracker = get_tracker(tracker.id)
     if tracker:
         tracker.pause()
 
 
 @app.post('/unpause_tracker')
-def unpause_tracker(tracker: SHA_ID):
-    tracker = get_tracker(tracker.full_id)
+def unpause_tracker(tracker: Tracker):
+    tracker = get_tracker(tracker.id)
     if tracker:
         tracker.unpause()
 
@@ -139,12 +135,16 @@ def unpause_tracker(tracker: SHA_ID):
 # ffmpeg -re -stream_loop -1 -i test.m4v -c copy -f rtsp rtsp://localhost:8554/mystream
 
 
-@app.websocket("/ws")
-async def get_stream(websocket: WebSocket):
+@app.websocket("/ws/{id}")
+async def get_stream(id: int, websocket: WebSocket):
+    if id not in trackers:
+        await websocket.close(403, "Tracker's ID is incorrect")
+        return
+    track = f'tracker{id}'
     await websocket.accept()
     try:
         while True:
-            s = redis.hget(f'tracker1001', 'jpg')
+            s = redis.hget(track, 'jpg')
             s = base64.b64decode(s)
             await websocket.send_bytes(s)
             await asyncio.sleep(0.1)
@@ -152,6 +152,9 @@ async def get_stream(websocket: WebSocket):
         logger.info("Client disconnected")
 
 
-@app.get("/stream")
-def video_feed(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/stream/{id}")
+def video_feed(id: int, request: Request):
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "id": id
+    })
