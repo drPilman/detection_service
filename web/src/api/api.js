@@ -1,7 +1,7 @@
 import * as axios from "axios";
+import base_url from "./base_url";
 
 const instance = axios.create()
-const base_url = 'http://drpilman.ga:8000'
 
 export const frontAPI = {
     check() {

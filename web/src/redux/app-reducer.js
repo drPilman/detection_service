@@ -108,6 +108,7 @@ export const unpauseTrackerTC = (tracker) => async (dispatch) => {
 
 export const updateTrackersTC = () => async (dispatch) => {
     let response = await frontAPI.listTrackers()
+    console.log(response)
     if (response.status === 200) {
         dispatch(updateTrackersAC(response.data.trackers))
     } else {
