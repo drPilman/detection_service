@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Live Streaming</title>
+</head>
+
+<body>
+
+    <head>
+        <title>Chat</title>
+    </head>
+
+    <body>
+        <h1>WebSocket Chat</h1>
+        <ul id='messages'>
+        </ul>
+        <script>
+            var ws = new WebSocket("ws://localhost:8090/ws/{{id}}");
+            ws.onmessage = function (event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+        </script>
+    </body>
+</body>
+
+</html>
