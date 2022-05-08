@@ -20,9 +20,6 @@ app = FastAPI()
 logger = logging.getLogger("main")
 
 templates = Jinja2Templates(directory="templates")
-import sys
-
-sys.path.insert(0, '..')
 
 
 @app.websocket("/ws/{id}")
@@ -33,7 +30,7 @@ async def get_stream(id: str, websocket: WebSocket):
         return
     await websocket.accept()
     logger.info("OOOOOOOOOOOOOOOOOOOOOOKK")
-    p = subprocess.Popen('ls',
+    p = subprocess.Popen('./deploy',
                          shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
