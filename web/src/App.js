@@ -1,5 +1,6 @@
-import React from 'react'
-import {connect} from "react-redux";
+import React, {useEffect} from 'react'
+import {connect} from "react-redux"
+import {Route, Routes} from 'react-router-dom'
 import './App.css';
 import AddTracker from "./components/AddTracker/AddTracker";
 import ListTrackers from "./components/ListTrackers/ListTrackers";
@@ -7,54 +8,28 @@ import RemoveTracker from "./components/RemoveTracker/RemoveTracker";
 import PauseTracker from "./components/PauseTracker/PauseTracker";
 import UnpauseTracker from "./components/UnpauseTracker/UnpauseTracker";
 import {initializeAppTC} from "./redux/app-reducer";
+import Main from "./components/Main/Main";
+import Video from "./components/Video/Video"
 
 
-class App extends React.Component {
-    componentDidMount() {
-        this.props.initializeAppTC()
-    }
+const App = (props) => {
 
-    render() {
-        let trackersC = this.props.trackers.map(
-            tracker => (<tr>
-                            <td>{tracker.full_id}</td>
-                            <td>{tracker.status}</td>
-                            <td>{tracker.isPaused
-                                    ? <UnpauseTracker full_id={tracker.full_id}/>
-                                    : <PauseTracker full_id={tracker.full_id}/>}
-                            </td>
-                            <td><RemoveTracker full_id={tracker.full_id} /></td>
-                        </tr>)
-
-        )
-        return (
-            <main>
-                <table>
-                    <thead>
-                        <tr>
-                            <td>id</td>
-                            <td>status</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {trackersC}
-                    </tbody>
-                </table>
-                <AddTracker/>
-            </main>
-        )
-    }
-
+    return (
+        <div>
+            <Routes>
+                <Route path={'/:streamId'} element={<Video /> } />
+                <Route path={'*'} element={<Main/>}/>
+            </Routes>
+        </div>
+    )
 }
 
 const mapStateToProps = (state) => ({
-    trackers: state.app.trackers
+
 })
 
 const mapDispatchToPropsObj = {
-    initializeAppTC
+
 }
 
 export default connect(mapStateToProps, mapDispatchToPropsObj)(App)

@@ -14,7 +14,7 @@ from log import log_config
 import base64
 import redis as Redis
 
-redis = Redis.Redis(host='detection_service-redis-1', port=6379, db=0)
+redis = Redis.Redis(host='detection_service_redis_1', port=6379, db=0)
 redis.set('tracker:uniq', 1000)
 templates = Jinja2Templates(directory="templates")
 
@@ -55,7 +55,8 @@ middleware = [
                allow_origins=['*'],
                allow_credentials=True,
                allow_methods=['*'],
-               allow_headers=['*'])
+               allow_headers=['*'],
+               expose_headers=["Access-Control-Allow-Origin"])
 ]
 app = FastAPI(middleware=middleware)
 
@@ -75,10 +76,7 @@ def add_tracker(source: RSTP_URL, request: Request):
                                       network_mode="host",
                                       detach=True,
                                       auto_remove=True,
-                                      device_requests=[
-                                          docker.types.DeviceRequest(
-                                              count=-1, capabilities=[['gpu']])
-                                      ])
+                                      )
     # logs = container.logs(stream=True)
     # for s in logs:
     #    print(s)

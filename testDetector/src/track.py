@@ -33,12 +33,11 @@ timer = Timer()
 
 
 def detect(opt):
-    out, source, yolo_model, deep_sort_model, show_vid, save_vid, save_txt, imgsz, evaluate, half, \
-    project, exist_ok, update, save_crop, redis_id = \
-        opt.output, opt.source, opt.yolo_model, opt.deep_sort_model, opt.show_vid, opt.save_vid, opt.save_txt, \
-        opt.imgsz, opt.evaluate, opt.half, opt.project, opt.exist_ok, opt.update, opt.save_crop, opt.redis_id
-    i=0
+    redis_id = opt.redis_id
+    i = 0
+    idx=-1
     while 1:
+        idx+=1
         timer()
         i=(i+1)%2
         with open(f'{i}.jpg','rb') as f:
@@ -49,11 +48,11 @@ def detect(opt):
             (str(1), 'obj', str(conf),
              *(map(str, [1,2,3,4])))))
 
-        print(f'{s}Done. YOLO:({timer():.3f}s)')
+        print(f'Done. ({timer():.3f}s)')
 
 
         jpg_as_text = base64.b64encode(img)
-        redis.hset(f'tracker{redis_id}', i, "|".join(result))
+        redis.hset(f'tracker{redis_id}', idx, "|".join(result))
         redis.hset(f'tracker{redis_id}', 'jpg', jpg_as_text)
 
 
@@ -141,9 +140,6 @@ if __name__ == '__main__':
     parser.add_argument('--dnn',
                         action='store_true',
                         help='use OpenCV DNN for ONNX inference')
-    parser.add_argument('--project',
-                        default=ROOT / 'runs/track',
-                        help='save results to project/name')
     parser.add_argument('--name',
                         default='exp',
                         help='save results to project/name')
@@ -155,6 +151,4 @@ if __name__ == '__main__':
                         help='redis id to save result')
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
-
-    with torch.no_grad():
-        detect(opt)
+    detect(opt)
