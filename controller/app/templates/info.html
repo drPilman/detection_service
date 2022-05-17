@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+</head>
+
+<body>
+    <ul id='messages'>
+    </ul>
+    <script>
+        let ws = new WebSocket("ws://127.0.0.1:8000/ws/info/{{id}}");
+        ws.onmessage = function (event) {
+            const arr = JSON.parse(event.data).sort((a, b) => a.frame - b.frame)
+            const messages = document.getElementById('messages')
+            for (key in arr) {
+                const message = document.createElement('li')
+                const content = document.createTextNode(JSON.stringify(arr[key]))
+                message.appendChild(content)
+                messages.insertBefore(message, messages.firstElementChild)
+            }
+        };
+    </script>
+</body>
+
+</html>

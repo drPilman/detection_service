@@ -13,8 +13,11 @@ from models import *
 from log import log_config
 import base64
 import redis as Redis
+import json
 
 redis = Redis.Redis(host='redis', port=6379, db=0)
+redis.flushall(
+)  #<============================================ not deploy me!!!!!!!!!!!!!!!!
 redis.set('tracker:uniq', 1000)
 templates = Jinja2Templates(directory="templates")
 
@@ -136,26 +139,61 @@ def unpause_tracker(tracker: Tracker):
 # ffmpeg -re -stream_loop -1 -i test.m4v -c copy -f rtsp rtsp://localhost:8554/mystream
 
 
-@app.websocket("/ws/{id}")
-async def get_stream(id: int, websocket: WebSocket):
-    if id not in trackers:
-        await websocket.close(403, "Tracker's ID is incorrect")
-        return
-    track = f'tracker{id}'
-    await websocket.accept()
-    try:
-        while True:
-            s = redis.hget(track, 'jpg')
-            s = base64.b64decode(s)
-            await websocket.send_bytes(s)
-            await asyncio.sleep(0.1)
-    except (WebSocketDisconnect, ConnectionClosedOK):
-        logger.info("Client disconnected")
+def sub_tracker(f):
+
+    async def decorator(id: int, websocket: WebSocket):
+        if id not in trackers:
+            await websocket.close(405)
+            return
+        await websocket.accept()
+        try:
+            channel = redis.pubsub()
+            channel.subscribe(id)
+            for msg in channel.listen():
+                await f(msg, id, websocket)
+        except (WebSocketDisconnect, ConnectionClosedOK):
+            logger.info("Client disconnected")
+
+    return decorator
+
+
+@app.websocket("/ws/stream/{id}")
+@sub_tracker
+async def get_stream(msg, id: int, websocket: WebSocket):
+    s = redis.hget('jpg', id)
+    if s:
+        s = base64.b64decode(s)
+        await websocket.send_bytes(s)
+    await asyncio.sleep(0.01)
+
+
+@app.websocket("/ws/info/{id}")
+@sub_tracker
+async def get_info(msg, id: int, websocket: WebSocket):
+    if msg['type'] == 'subscribe':
+        s = redis.hgetall(id)
+        w = [x.decode('utf-8') for x in s.values()]
+        await websocket.send_text(f"[{','.join(w)}]")
+        await asyncio.sleep(0.01)
+    elif msg['type'] == 'message':
+        frame_id = int(msg['data'])
+        result_json = f"[{redis.hget(id, frame_id).decode('utf-8')}]"
+        print(result_json)
+        await websocket.send_text(result_json)
+        await asyncio.sleep(0.01)
 
 
 @app.get("/stream/{id}")
 def video_feed(id: int, request: Request):
-    return templates.TemplateResponse("index.html", {
+    return templates.TemplateResponse("stream.html", {
+        "request": request,
+        "id": id
+    })
+
+
+@app.get("/info/{id}")
+def video_feed(id: int, request: Request):
+    return templates.TemplateResponse("info.html", {
         "request": request,
         "id": id
     })
