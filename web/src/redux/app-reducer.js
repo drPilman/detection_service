@@ -5,6 +5,7 @@ const REMOVE_TRACKER = 'REMOVE_TRACKER'
 const PAUSE_TRACKER = 'PAUSE_TRACKER'
 const UNPAUSE_TRACKER = 'UNPAUSE_TRACKER'
 const UPDATE_TRACKERS = 'UPDATE_TRACKERS'
+const UPDATE_INFO = 'UPDATE_INFO'
 const TOGGLE_IS_FETCHING = 'TOGGLE_IS_FETCHING'
 
 let initialState = {
@@ -44,10 +45,10 @@ const appReducer = (state = initialState, action) => {
             return {...state, trackers: newPausedTrackersList}
 
         case UNPAUSE_TRACKER:
-            let newUnausedTrackersList = [...state.trackers]
-            newUnausedTrackersList.find(tracker => tracker.full_id === action.full_id).isPaused = false
+            let newUnpausedTrackersList = [...state.trackers]
+            newUnpausedTrackersList.find(tracker => tracker.full_id === action.full_id).isPaused = false
 
-            return {...state, trackers: newUnausedTrackersList}
+            return {...state, trackers: newUnpausedTrackersList}
 
         default:
             return state
@@ -64,6 +65,7 @@ const toggleIsFetchingAC = (isFetching) => ({type: TOGGLE_IS_FETCHING, isFetchin
 
 export const addTrackerTC = (url) => async (dispatch) => {
     let response = await frontAPI.addTracker(url)
+
     if (response.status === 200) {
         dispatch(addTrackerAC({full_id: response.data[0], status: response.data[1]}))
     } else {

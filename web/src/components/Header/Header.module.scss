@@ -1,0 +1,56 @@
+header {
+  font-size: 1.25rem;
+  background-color: #2da0c0;
+  color: #f1f1f1;
+  padding: 2em;
+  position: relative;
+
+
+  .prev {
+    cursor: pointer;
+    width: max-content;
+    position: absolute;
+    left: 2em;
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: 1em 0.5em;
+
+    .backContainer {
+      display: flex;
+      flex-direction: row;
+
+      .backArrow {
+        filter: invert(1);
+        align-self: center;
+        height: max-content;
+
+        img {
+          width: 1em;
+          height: 0.8em;
+        }
+      }
+    }
+
+    p {
+      margin: 0;
+      padding-left: 0.5em;
+    }
+
+    &:hover {
+      background-color: #21778f;
+    }
+  }
+
+  .logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    p {
+      width: max-content;
+      font-size: 2em;
+      margin: 0;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+.addTracker {
+  font-size: 1.25rem;
+  padding: 1.5em 0;
+  box-sizing: border-box;
+
+  h1 {
+    font-size: 1.75em;
+    width: max-content;
+    padding-right: 6em;
+    padding-bottom: 0.25em;
+    border-bottom: .09em solid #c2c2c2;
+    margin-bottom: 0.5em;
+    margin-top: 0;
+  }
+
+  form {
+    width: 100%;
+    font-size: 1.5em;
+    display: flex;
+    flex-direction: row;
+
+
+    input {
+      flex: 0 0 66.6666%;
+      font-size: .75em;
+      padding: .25em;
+    }
+
+    button {
+      flex: 0 0 33.3333%;
+      font-size: .75em;
+      padding: .25em;
+      border: 0;
+      border-radius: 0.25em;
+      background-color: #2da0c0;
+      color: #f1f1f1;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #21778f;
+      }
+    }
+  }
+}

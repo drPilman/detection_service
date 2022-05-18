@@ -11,7 +11,7 @@ const UnpauseTrackerForm = (props) => {
     )
 }
 
-const UnpauseTrackerReduxForm = reduxForm({form: 'pauseTracker'})(UnpauseTrackerForm)
+const UnpauseTrackerReduxForm = reduxForm({form: 'unpauseTracker'})(UnpauseTrackerForm)
 
 const UnpauseTracker = (props) => {
     const onSubmit = () => {

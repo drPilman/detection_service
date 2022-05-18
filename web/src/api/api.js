@@ -14,7 +14,6 @@ export const frontAPI = {
         return instance.get(base_url + `/list_trackers`)
     },
     removeTracker(id) {
-        console.log(id)
         return instance.post(base_url + `/remove_tracker`, { id: id })
     },
     pauseTracker(id) {

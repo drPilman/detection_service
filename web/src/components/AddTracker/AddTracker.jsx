@@ -2,7 +2,7 @@ import React from "react";
 import {Field, reduxForm} from "redux-form";
 import {connect} from "react-redux";
 import {addTrackerTC} from "../../redux/app-reducer";
-
+import s from './AddTracker.module.scss'
 const AddTrackerForm = (props) => {
     return (
         <form onSubmit={props.handleSubmit}>
@@ -22,7 +22,7 @@ const AddTracker = (props) => {
         props.addTrackerTC(formData.addTrackerUrl)
     }
     return (
-        <div>
+        <div className={s.addTracker}>
             <h1>Add tracker</h1>
             <AddTrackerReduxForm onSubmit={onSubmit}/>
         </div>

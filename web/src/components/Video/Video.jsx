@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router-dom"
+import s from './Video.module.scss'
 
 const Video = (props) => {
     const params = useParams()
@@ -16,7 +17,7 @@ const Video = (props) => {
     let [imgSrc, setImgSrc] = useState('')
 
     return (
-        <div>
+        <div className={s.videoContainer}>
             <img src={imgSrc} id={'frame'} onLoad={(e) => { URL.revokeObjectURL(this.src) }} />
         </div>
     )
