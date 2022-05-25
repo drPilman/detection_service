@@ -2,7 +2,7 @@ import asyncio
 import docker
 import logging
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, Response
-from websockets.exceptions import ConnectionClosedOK
+from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware import Middleware
@@ -17,7 +17,7 @@ import json
 
 redis = Redis.Redis(host='redis', port=6379, db=0)
 redis.flushall(
-)  #<============================================ not deploy me!!!!!!!!!!!!!!!!
+)  #<============================== not deploy me!!!!!!!!!!!!!!!!
 redis.set('tracker:uniq', 1000)
 templates = Jinja2Templates(directory="templates")
 
@@ -151,7 +151,7 @@ def sub_tracker(f):
             channel.subscribe(id)
             for msg in channel.listen():
                 await f(msg, id, websocket)
-        except (WebSocketDisconnect, ConnectionClosedOK):
+        except (WebSocketDisconnect, ConnectionClosedOK, ConnectionClosedError):
             logger.info("Client disconnected")
 
     return decorator
