@@ -7,7 +7,8 @@ import PauseTracker from "./../PauseTracker/PauseTracker";
 import UnpauseTracker from "./../UnpauseTracker/UnpauseTracker";
 import {initializeAppTC} from "./../../redux/app-reducer";
 import {useNavigate} from 'react-router-dom'
-import s from './Main.scss'
+import s from './Main.module.scss'
+import s1 from './../../common/button.module.scss'
 
 
 const Main = (props) => {
@@ -21,9 +22,11 @@ const Main = (props) => {
         tracker => (<tr>
             <td>{tracker.full_id}</td>
             <td>{tracker.status}</td>
-            <td><button onClick={() => {navigate('/'+tracker.full_id)}}>Go to stream</button></td>
-            <td><button onClick={() => {navigate('/info/'+tracker.full_id)}}>See info</button></td>
-            <td>{tracker.isPaused
+            <td><button onClick={() => {navigate('/'+tracker.full_id)}}
+                        className={s1.btn}>Go to stream</button></td>
+            <td><button onClick={() => {navigate('/info/'+tracker.full_id)}}
+                        className={s1.btn}>See info</button></td>
+            <td>{tracker.status === 'paused'
                 ? <UnpauseTracker full_id={tracker.full_id}/>
                 : <PauseTracker full_id={tracker.full_id}/>}
             </td>

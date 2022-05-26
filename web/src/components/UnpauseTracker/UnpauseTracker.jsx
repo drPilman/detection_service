@@ -1,23 +1,13 @@
 import React from "react";
-import {reduxForm} from "redux-form";
 import {connect} from "react-redux";
 import {unpauseTrackerTC} from "../../redux/app-reducer";
-
-const UnpauseTrackerForm = (props) => {
-    return (
-        <form onSubmit={props.handleSubmit}>
-            <button disabled={props.isFetching}>Unpause Tracker</button>
-        </form>
-    )
-}
-
-const UnpauseTrackerReduxForm = reduxForm({form: 'unpauseTracker'})(UnpauseTrackerForm)
+import s from '../../common/button.module.scss'
 
 const UnpauseTracker = (props) => {
-    const onSubmit = () => {
-        props.unpauseTrackerTC(Number(props.full_id))
-    }
-    return <UnpauseTrackerReduxForm onSubmit={onSubmit} isFetching={props.isFetching}/>
+    return <button disabled={props.isFetching}
+                   className={s.btn}
+                   onClick={() => props.unpauseTrackerTC(+props.full_id)}>Unpause Tracker</button>
+
 }
 
 const mapStateToProps = (state) => ({

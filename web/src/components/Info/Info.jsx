@@ -3,14 +3,13 @@ import {useParams} from "react-router-dom"
 
 const Info = (props) => {
     const params = useParams()
-    let [infoObj, setInfoObj] = useState('')
+    let [infoObj, setInfoObj] = useState([])
 
     useEffect(async () => {
         let ws = new WebSocket(`ws://drpilman.ga:8000/ws/info/${params.streamId}`)
         ws.onmessage = (event) => {
             const arr = JSON.parse(event.data).sort((a, b) => a.frame - b.frame)
-            setInfoObj(arr[0])
-            console.log(arr)
+            setInfoObj([...infoObj, arr[0]])
         }
     }, [])
 
