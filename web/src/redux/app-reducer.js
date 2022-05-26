@@ -31,7 +31,7 @@ const appReducer = (state = initialState, action) => {
 const updateTrackersAC = (trackers) => ({type: UPDATE_TRACKERS, trackers})
 const toggleIsFetchingAC = (isFetching) => ({type: TOGGLE_IS_FETCHING, isFetching})
 
-const updateTracker = (dispatch, errorText, status) => () => {
+const updateTracker =  (dispatch, errorText, status) => async () => {
     if (status === 200) {
         dispatch(updateTrackersTC())
     } else {
