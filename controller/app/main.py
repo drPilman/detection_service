@@ -16,8 +16,7 @@ import redis as Redis
 import json
 
 redis = Redis.Redis(host='redis', port=6379, db=0)
-redis.flushall(
-)  #<============================== not deploy me!!!!!!!!!!!!!!!!
+redis.flushall()  #<====================== not deploy me!!!!!!!!!!!!!!!!
 redis.set('tracker:uniq', 1000)
 templates = Jinja2Templates(directory="templates")
 
@@ -95,11 +94,10 @@ def add_tracker(source: RSTP_URL, request: Request):
 def list_trackers():
     containers = client.containers.list(
         all=True, filters={"ancestor": "drpilman/detector"})
-    ids = [{
+    return [{
         'full_id': trackers.r[container.id],
         'status': container.status
     } for container in containers if container.id in trackers.r]
-    return {'trackers': ids, 'count': len(ids)}
 
 
 def get_tracker(id):
@@ -142,16 +140,20 @@ def unpause_tracker(tracker: Tracker):
 def sub_tracker(f):
 
     async def decorator(id: int, websocket: WebSocket):
-        if id not in trackers:
-            await websocket.close(405)
-            return
-        await websocket.accept()
         try:
+            if id not in trackers:
+                await websocket.close(405)
+                return
+            await websocket.accept()
             channel = redis.pubsub()
             channel.subscribe(id)
-            for msg in channel.listen():
-                await f(msg, id, websocket)
-        except (WebSocketDisconnect, ConnectionClosedOK, ConnectionClosedError):
+            while True:
+                msg = channel.get_message()
+                if msg is not None:
+                    await f(msg, id, websocket)
+                await asyncio.sleep(0.1)
+        except (WebSocketDisconnect, ConnectionClosedOK,
+                ConnectionClosedError):
             logger.info("Client disconnected")
 
     return decorator
@@ -160,27 +162,26 @@ def sub_tracker(f):
 @app.websocket("/ws/stream/{id}")
 @sub_tracker
 async def get_stream(msg, id: int, websocket: WebSocket):
-    s = redis.hget('jpg', id)
-    if s:
-        s = base64.b64decode(s)
-        await websocket.send_bytes(s)
-    await asyncio.sleep(0.01)
+    if msg['type'] == 'message':
+        s = redis.hget('jpg', id)
+        if s:
+            s = base64.b64decode(s)
+            await websocket.send_bytes(s)
 
 
 @app.websocket("/ws/info/{id}")
 @sub_tracker
 async def get_info(msg, id: int, websocket: WebSocket):
     if msg['type'] == 'subscribe':
+        print('subscribe to channel')
         s = redis.hgetall(id)
         w = [x.decode('utf-8') for x in s.values()]
         await websocket.send_text(f"[{','.join(w)}]")
-        await asyncio.sleep(0.01)
     elif msg['type'] == 'message':
         frame_id = int(msg['data'])
         result_json = f"[{redis.hget(id, frame_id).decode('utf-8')}]"
         print(result_json)
         await websocket.send_text(result_json)
-        await asyncio.sleep(0.01)
 
 
 @app.get("/stream/{id}")
