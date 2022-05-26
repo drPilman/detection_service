@@ -43,7 +43,7 @@ export const addTrackerTC = (url) => async (dispatch) => {
     let response = await frontAPI.addTracker(url)
 
     let errorText = 'some problem with adding tracker'
-    updateTracker(dispatch, errorText, response.status)
+    await updateTracker(dispatch, errorText, response.status)()
 }
 
 export const removeTrackerTC = (tracker) => async (dispatch) => {
@@ -51,7 +51,7 @@ export const removeTrackerTC = (tracker) => async (dispatch) => {
     let response = await frontAPI.removeTracker(tracker)
 
     let errorText = 'some error with deleting'
-    updateTracker(dispatch, errorText, response.status)
+    await updateTracker(dispatch, errorText, response.status)()
 
     dispatch(toggleIsFetchingAC(false))
 }
@@ -61,7 +61,7 @@ export const pauseTrackerTC = (tracker) => async (dispatch) => {
     let response = await frontAPI.pauseTracker(tracker)
 
     let errorText = 'some error with pausing'
-    updateTracker(dispatch, errorText, response.status)
+    await updateTracker(dispatch, errorText, response.status)()
 
     dispatch(toggleIsFetchingAC(false))
 }
@@ -71,7 +71,7 @@ export const unpauseTrackerTC = (tracker) => async (dispatch) => {
     let response = await frontAPI.unpauseTracker(tracker)
 
     let errorText = 'some error with unpausing'
-    updateTracker(dispatch, errorText, response.status)
+    await updateTracker(dispatch, errorText, response.status)()
 
     dispatch(toggleIsFetchingAC(false))
 }
