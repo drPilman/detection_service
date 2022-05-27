@@ -31,11 +31,15 @@ class Rdict(dict):
 
     def __init__(self):
         self.r = {}
-        return super().__init__()
+        super().__init__()
 
     def __setitem__(self, __k, __v) -> None:
         self.r[__v] = __k
         return super().__setitem__(__k, __v)
+
+    def __delitem__(self, __k):
+        del self.r[self[__k]]
+        super().__delitem__(__k)
 
 
 trackers = Rdict()
@@ -108,7 +112,7 @@ def get_tracker(id):
         raise HTTPException(status_code=404, detail="Item not found")
 
 @app.post('/remove_all_tracker')
-def tracker_info():
+def remove_all_tracker():
 
     return {'msg': 'not implemented yet'}
 
@@ -119,9 +123,10 @@ def tracker_info(tracker: Tracker):
 
 @app.post('/remove_tracker')
 def remove_tracker(tracker: Tracker):
-    tracker = get_tracker(tracker.id)
-    if tracker:
-        tracker.remove(force=True)
+    tracker_container = get_tracker(tracker.id)
+    if tracker_container:
+        tracker_container.remove(force=True)
+        del trackers[tracker.id]
 
 
 @app.post('/pause_tracker')
@@ -151,15 +156,18 @@ def sub_tracker(f):
             await websocket.accept()
             channel = redis.pubsub()
             channel.subscribe(id)
-            while websocket.client_state == WebSocketState.CONNECTED:
+            while websocket.client_state == WebSocketState.CONNECTED and id in trackers:
                 msg = channel.get_message()
-                print(await websocket.receive())
                 if msg is not None:
                     await f(msg, id, websocket)
                 await asyncio.sleep(0.01)
         except (WebSocketDisconnect, ConnectionClosedOK,
-                ConnectionClosedError):
-            logger.info("Client disconnected")
+                ConnectionClosedError) as e:
+            logger.info("Client disconnected" + str(e))
+        except ConnectionClosedOK as e:
+            logger.info("Client disconnected with OK" + str(e))
+
+
 
     return decorator
 
@@ -198,7 +206,7 @@ def video_feed(id: int, request: Request):
 
 
 @app.get("/info/{id}")
-def video_feed(id: int, request: Request):
+def info_feed(id: int, request: Request):
     return templates.TemplateResponse("info.html", {
         "request": request,
         "id": id

@@ -67,11 +67,10 @@ async def test_tracker_info():
     async with websockets.connect(f"ws://127.0.0.1:8000/ws/info/{fullid}") as websocket:
         msg = await websocket.recv()
         assert msg == "[]"
-        for i in range(20):
+        for i in range(5):
             msg = await websocket.recv()
             assert msg == f'[{{"frame": {i}, "data": [[1, "obj_name", 0.78, [1.0, 2.0, 3.0, 4.0]]]}}]'
-        print(await websocket.close(code=1003))
-        print(websocket.closed)
+        await websocket.close()
 
     requests.post(url("/remove_tracker"),
                   json={"id": fullid})
