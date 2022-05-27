@@ -6,7 +6,7 @@ const Info = (props) => {
     let [infoObj, setInfoObj] = useState([])
 
     useEffect(async () => {
-        let ws = new WebSocket(`ws://drpilman.ga:8000/ws/info/${params.streamId}`)
+        let ws = new WebSocket(`ws://127.0.0.1:8000/ws/info/${params.streamId}`)
         ws.onmessage = (event) => {
             const arr = JSON.parse(event.data).sort((a, b) => a.frame - b.frame)
             setInfoObj([...infoObj, arr[0]])

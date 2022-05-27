@@ -6,7 +6,7 @@ const Video = (props) => {
     const params = useParams()
 
     useEffect(async () => {
-        let ws = await new WebSocket(`ws://drpilman.ga:8000/ws/stream/${params.streamId}`)
+        let ws = await new WebSocket(`ws://127.0.0.1:8000/ws/stream/${params.streamId}`)
 
         ws.onmessage = (e) => {
             setImgSrc(URL.createObjectURL(e.data))
