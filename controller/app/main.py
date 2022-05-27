@@ -2,7 +2,9 @@ import asyncio
 import docker
 import logging
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, Response
+from fastapi.responses import FileResponse
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
+from starlette.websockets import WebSocketState
 
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware import Middleware
@@ -105,6 +107,10 @@ def get_tracker(id):
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Item not found")
 
+@app.post('/remove_all_tracker')
+def tracker_info():
+
+    return {'msg': 'not implemented yet'}
 
 @app.post('/tracker_info')
 def tracker_info(tracker: Tracker):
@@ -145,7 +151,7 @@ def sub_tracker(f):
             await websocket.accept()
             channel = redis.pubsub()
             channel.subscribe(id)
-            while True:
+            while websocket.client_state == WebSocketState.CONNECTED:
                 msg = channel.get_message()
                 if msg is not None:
                     await f(msg, id, websocket)
@@ -196,3 +202,8 @@ def video_feed(id: int, request: Request):
         "request": request,
         "id": id
     })
+
+
+@app.get("/download/{id}")
+def download(id: str):
+    return FileResponse(f"./out/{id}")
