@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  detector:
+    image: drpilman/testdetector
+    build:
+      context: testDetector
+

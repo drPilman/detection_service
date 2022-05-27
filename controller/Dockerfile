@@ -5,7 +5,6 @@ ENV PYTHONUNBUFFERED 1
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
-RUN pip install -U Jinja2==3.0.3
 COPY ./app /app
 
 EXPOSE 8000

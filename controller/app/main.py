@@ -13,10 +13,12 @@ from models import *
 from log import log_config
 import base64
 import redis as Redis
-import json
+import os
 
-redis = Redis.Redis(host='redis', port=6379, db=0)
-redis.flushall()  #<====================== not deploy me!!!!!!!!!!!!!!!!
+detector = os.environ["DETECTOR_IMAGE"]
+device = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])] if os.environ["DEVICE"] == 'gpu' else []
+redis = Redis.Redis(host=os.environ["REDIS_HOST"], port=6379, db=0)
+redis.flushall()  # <====================== not deploy me!!!!!!!!!!!!!!!!
 redis.set('tracker:uniq', 1000)
 templates = Jinja2Templates(directory="templates")
 
@@ -39,19 +41,19 @@ trackers = Rdict()
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 logger = logging.getLogger("main")
 
-#origins = ["http://localhost:3000", "http://0.0.0.0:3000","http://127.0.0.1:3000"]
+# origins = ["http://localhost:3000", "http://0.0.0.0:3000","http://127.0.0.1:3000"]
 origins = [
     "http://localhost:3000", "localhost:3000", "http://drpilman.ga:3000/"
 ]
 
-#app.add_middleware(
+# app.add_middleware(
 #    CORSMiddleware,
 #    allow_origins=origins,
 #    allow_credentials=True,
 #    allow_methods=["*"],
 #    allow_headers=["*"],
 #    expose_headers=["Access-Control-Allow-Origin"]
-#)
+# )
 middleware = [
     Middleware(CORSMiddleware,
                allow_origins=['*'],
@@ -73,15 +75,12 @@ def add_tracker(source: RSTP_URL, request: Request):
     id = redis.incr('tracker:uniq')
 
     # docker run --rm --net="host" --gpus=all drpilman/detector rtsp://127.0.0.1:8554/mystream
-    container = client.containers.run("drpilman/detector",
+    container = client.containers.run(detector,
                                       f"{source.url} --redis-id {id}",
                                       network_mode="host",
                                       detach=True,
                                       auto_remove=True,
-                                      device_requests=[
-                                          docker.types.DeviceRequest(
-                                              count=-1, capabilities=[['gpu']])
-                                      ])
+                                      device_requests=device)
     # logs = container.logs(stream=True)
     # for s in logs:
     #    print(s)
@@ -93,7 +92,7 @@ def add_tracker(source: RSTP_URL, request: Request):
 @app.get('/list_trackers')
 def list_trackers():
     containers = client.containers.list(
-        all=True, filters={"ancestor": "drpilman/detector"})
+        all=True, filters={"ancestor": detector})
     return [{
         'full_id': trackers.r[container.id],
         'status': container.status
@@ -138,7 +137,6 @@ def unpause_tracker(tracker: Tracker):
 
 
 def sub_tracker(f):
-
     async def decorator(id: int, websocket: WebSocket):
         try:
             if id not in trackers:
@@ -151,7 +149,7 @@ def sub_tracker(f):
                 msg = channel.get_message()
                 if msg is not None:
                     await f(msg, id, websocket)
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.01)
         except (WebSocketDisconnect, ConnectionClosedOK,
                 ConnectionClosedError):
             logger.info("Client disconnected")

@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 import redis as Redis
+import json
 
 
 class Timer:
@@ -31,29 +32,39 @@ redis = Redis.Redis(host='localhost', port=6379, db=0)
 timer = Timer()
 
 
-
 def detect(opt):
     redis_id = opt.redis_id
     i = 0
-    idx=-1
-    while 1:
-        idx+=1
+    frame_idx = -1
+    while frame_idx < 1000:
+        frame_idx += 1
         timer()
-        i=(i+1)%2
-        with open(f'{i}.jpg','rb') as f:
+        i = (i + 1) % 2
+        with open(f'{i}.jpg', 'rb') as f:
             img = f.read()
+        time.sleep(0.1)
+        result = []
+
+        id = 1
+        cls = 0
+        names = ['obj_name']
         conf = 0.78
-        result=[]
-        result.append(','.join(
-            (str(1), 'obj', str(conf),
-             *(map(str, [1,2,3,4])))))
+        bboxes = [1, 2, 3, 4]
+        result.append(
+            (int(id), names[int(cls)], float(conf),
+             list(map(float, bboxes))))
 
         print(f'Done. ({timer():.3f}s)')
-
-
         jpg_as_text = base64.b64encode(img)
-        redis.hset(f'tracker{redis_id}', idx, "|".join(result))
-        redis.hset(f'tracker{redis_id}', 'jpg', jpg_as_text)
+
+        redis.hset(redis_id, frame_idx,
+                   json.dumps({
+                       'frame': frame_idx,
+                       'data': result
+                   }))
+        redis.hset('jpg', redis_id, jpg_as_text)
+        redis.publish(redis_id, frame_idx)
+
 
 
 

@@ -1,4 +1,5 @@
 docker
 redis
-#fastapi
-#uvicorn[standard]
+fastapi
+uvicorn[standard]
+Jinja2==3.0.3

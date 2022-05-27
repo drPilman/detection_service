@@ -10,3 +10,4 @@ services:
       context: detector
     depends_on:
       - ml_cv
+
