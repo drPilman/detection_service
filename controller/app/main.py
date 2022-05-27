@@ -153,6 +153,7 @@ def sub_tracker(f):
             channel.subscribe(id)
             while websocket.client_state == WebSocketState.CONNECTED:
                 msg = channel.get_message()
+                print(await websocket.receive())
                 if msg is not None:
                     await f(msg, id, websocket)
                 await asyncio.sleep(0.01)
