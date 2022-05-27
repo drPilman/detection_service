@@ -1,1 +1,1 @@
-export default 'http://drpilman.ga:8000'
+export default 'http://127.0.0.1:8000'
