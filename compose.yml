@@ -1,10 +1,17 @@
 version: "3.9"
 services:
+
   redis:
     image: redis:7.0.0-alpine3.15
     ports:
       - "8001:8001"
       - "6379:6379"
+    healthcheck:
+      test: redis-cli ping | grep PONG
+      interval: 1s
+      timeout: 3s
+      retries: 10
+
   controller:
     image: drpilman/controller
     build:
@@ -16,15 +23,19 @@ services:
       - DEVICE=gpu
       - REDIS_HOST=redis
     volumes:
+      - ./store:/app/store
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+
   rtsp_test_server:
     image: drpilman/testvideo
     ports:
       - "8554:8554"
     build:
       context: rtsp_server
+
   web:
     image: drpilman/web
     build:
@@ -33,6 +44,3 @@ services:
         API_HOST: 127.0.0.1:8000
     ports:
       - "3000:3000"
-    depends_on:
-      - controller
-      - rtsp_test_server

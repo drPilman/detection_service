@@ -1,9 +1,11 @@
 version: "3.9"
 services:
+
   ml_cv:
     image: drpilman/ml_cv:cuda-11.4.0-ubuntu20.04
     build:
       context: ml_cv
+
   detector:
     image: drpilman/detector
     build:
