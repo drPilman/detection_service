@@ -5,7 +5,7 @@ const TOGGLE_IS_FETCHING = 'TOGGLE_IS_FETCHING'
 
 let initialState = {
     trackers: [
-        {full_id: 1, status: 'test'}
+        {tracker_id: 1, status: 'test'}
     ],
     isFetching: false
 }

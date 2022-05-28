@@ -6,7 +6,7 @@ import s from "../../common/button.module.scss";
 const RemoveTracker = (props) => {
     return <button disabled={props.isFetching}
                    className={s.btn}
-                   onClick={() => props.removeTrackerTC(+props.full_id)}>Remove Tracker</button>
+                   onClick={() => props.removeTrackerTC(+props.tracker_id)}>Remove Tracker</button>
 
 }
 

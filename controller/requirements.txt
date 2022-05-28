@@ -1,5 +1,7 @@
 docker
 redis
 fastapi
+aiofiles
+python-multipart
 uvicorn[standard]
 Jinja2==3.0.3

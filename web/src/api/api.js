@@ -5,22 +5,22 @@ const instance = axios.create()
 
 export const frontAPI = {
     check() {
-        return instance.get('/')
+        return instance.get('http://' + base_url + '/')
     },
-    addTracker(url) {
-        return instance.post(base_url + '/add_tracker', { url })
+    addTracker(rtsp_url) {
+        return instance.post('http://' + base_url + '/add_tracker', { rtsp_url })
     },
     listTrackers() {
-        return instance.get(base_url + `/list_trackers`)
+        return instance.get('http://' + base_url + `/list_trackers`)
     },
-    removeTracker(id) {
-        return instance.post(base_url + `/remove_tracker`, { id })
+    removeTracker(tracker_id) {
+        return instance.post('http://' + base_url + `/remove_tracker`, { tracker_id })
     },
-    pauseTracker(id) {
-        return instance.post(base_url + `/pause_tracker`, { id })
+    pauseTracker(tracker_id) {
+        return instance.post('http://' + base_url + `/pause_tracker`, { tracker_id })
     },
-    unpauseTracker(id) {
-        return instance.post(base_url + `/unpause_tracker`, { id })
+    unpauseTracker(tracker_id) {
+        return instance.post('http://' + base_url + `/unpause_tracker`, { tracker_id })
     }
 }
 

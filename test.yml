@@ -16,6 +16,7 @@ services:
       - DEVICE=cpu
       - REDIS_HOST=redis
     volumes:
+      - ./store:/app/store
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
@@ -23,6 +24,8 @@ services:
     image: drpilman/web
     build:
       context: web
+      args:
+        API_HOST: 127.0.0.1:8000
     ports:
       - "3000:3000"
     depends_on:

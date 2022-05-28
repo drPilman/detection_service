@@ -20,17 +20,17 @@ const Main = (props) => {
 
     let trackersC = props.trackers.map(
         tracker => (<tr>
-            <td>{tracker.full_id}</td>
+            <td>{tracker.tracker_id}</td>
             <td>{tracker.status}</td>
-            <td><button onClick={() => {navigate('/'+tracker.full_id)}}
+            <td><button onClick={() => {navigate('/'+tracker.tracker_id)}}
                         className={s1.btn}>Go to stream</button></td>
-            <td><button onClick={() => {navigate('/info/'+tracker.full_id)}}
+            <td><button onClick={() => {navigate('/info/'+tracker.tracker_id)}}
                         className={s1.btn}>See info</button></td>
             <td>{tracker.status === 'paused'
-                ? <UnpauseTracker full_id={tracker.full_id}/>
-                : <PauseTracker full_id={tracker.full_id}/>}
+                ? <UnpauseTracker tracker_id={tracker.tracker_id}/>
+                : <PauseTracker tracker_id={tracker.tracker_id}/>}
             </td>
-            <td><RemoveTracker full_id={tracker.full_id} /></td>
+            <td><RemoveTracker tracker_id={tracker.tracker_id} /></td>
         </tr>)
     )
 

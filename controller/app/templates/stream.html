@@ -8,7 +8,7 @@
 <body>
     <img id="frame" src="">
     <script>
-        let ws = new WebSocket("ws://127.0.0.1:8000/ws/stream/{{id}}");
+        let ws = new WebSocket("ws://127.0.0.1:8000/ws/stream/{{tracker_id}}");
         let image = document.getElementById("frame");
         image.onload = function () {
             URL.revokeObjectURL(this.src); // release the blob URL once the image is loaded

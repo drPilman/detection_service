@@ -6,7 +6,7 @@ import s from './../../common/button.module.scss'
 const PauseTracker = (props) => {
     return <button disabled={props.isFetching}
                    className={s.btn}
-                   onClick={() => props.pauseTrackerTC(+props.full_id)}>Pause Tracker</button>
+                   onClick={() => props.pauseTrackerTC(+props.tracker_id)}>Pause Tracker</button>
 
 }
 

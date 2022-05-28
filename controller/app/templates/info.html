@@ -9,7 +9,7 @@
     <ul id='messages'>
     </ul>
     <script>
-        let ws = new WebSocket("ws://127.0.0.1:8000/ws/info/{{id}}");
+        let ws = new WebSocket("ws://127.0.0.1:8000/ws/info/{{tracker_id}}");
         ws.onmessage = function (event) {
             const arr = JSON.parse(event.data).sort((a, b) => a.frame - b.frame)
             const messages = document.getElementById('messages')

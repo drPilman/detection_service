@@ -1,7 +1,7 @@
 import asyncio
 import docker
 import logging
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, Response
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, Response, UploadFile, File, Body
 from fastapi.responses import FileResponse
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from starlette.websockets import WebSocketState
@@ -11,11 +11,12 @@ from starlette.middleware import Middleware
 from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
 
-from models import *
+from typing import Union
 from log import log_config
 import base64
 import redis as Redis
 import os
+import glob
 
 detector = os.environ["DETECTOR_IMAGE"]
 device = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])] if os.environ["DEVICE"] == 'gpu' else []
@@ -77,12 +78,11 @@ def health_check():
 
 
 @app.post('/add_tracker')
-def add_tracker(source: RSTP_URL, request: Request):
-    id = redis.incr('tracker:uniq')
-
+def add_tracker(rtsp_url: str = Body(..., embed=True)):
+    tracker_id = redis.incr('tracker:uniq')
     # docker run --rm --net="host" --gpus=all drpilman/detector rtsp://127.0.0.1:8554/mystream
     container = client.containers.run(detector,
-                                      f"{source.url} --redis-id {id}",
+                                      f"{rtsp_url} --redis-id {tracker_id}",
                                       network_mode="host",
                                       detach=True,
                                       auto_remove=True,
@@ -90,9 +90,24 @@ def add_tracker(source: RSTP_URL, request: Request):
     # logs = container.logs(stream=True)
     # for s in logs:
     #    print(s)
-    trackers[id] = container.id
+    trackers[tracker_id] = container.id
+    return {
+        'tracker_id': tracker_id,
+        'status': container.status
+    }
 
-    return [id, container.status]
+
+@app.post('/add_tracker_file')
+async def upload(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        with open(f'/app/store/in/{file.filename}', 'wb') as f:
+            f.write(contents)
+    except Exception as e:
+        raise HTTPException(status_code=402, detail=f"There was an error uploading the file: {e}")
+    finally:
+        await file.close()
+    return {"message": f"Successfully uploaded {file.filename}"}
 
 
 @app.get('/list_trackers')
@@ -100,45 +115,46 @@ def list_trackers():
     containers = client.containers.list(
         all=True, filters={"ancestor": detector})
     return [{
-        'full_id': trackers.r[container.id],
+        'tracker_id': trackers.r[container.id],
         'status': container.status
     } for container in containers if container.id in trackers.r]
 
 
-def get_tracker(id):
+def get_tracker(tracker_id):
     try:
-        return client.containers.get(trackers[id])
+        return client.containers.get(trackers[tracker_id])
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Item not found")
 
+
 @app.post('/remove_all_tracker')
 def remove_all_tracker():
-
     return {'msg': 'not implemented yet'}
 
+
 @app.post('/tracker_info')
-def tracker_info(tracker: Tracker):
+def tracker_info(tracker_id: int):
     return {'msg': 'not implemented yet'}
 
 
 @app.post('/remove_tracker')
-def remove_tracker(tracker: Tracker):
-    tracker_container = get_tracker(tracker.id)
+def remove_tracker(tracker_id: int = Body(..., embed=True)):
+    tracker_container = get_tracker(tracker_id)
     if tracker_container:
         tracker_container.remove(force=True)
-        del trackers[tracker.id]
+        del trackers[tracker_id]
 
 
 @app.post('/pause_tracker')
-def pause_tracker(tracker: Tracker):
-    tracker = get_tracker(tracker.id)
+def pause_tracker(tracker_id: int = Body(..., embed=True)):
+    tracker = get_tracker(tracker_id)
     if tracker:
         tracker.pause()
 
 
 @app.post('/unpause_tracker')
-def unpause_tracker(tracker: Tracker):
-    tracker = get_tracker(tracker.id)
+def unpause_tracker(tracker_id: int = Body(..., embed=True)):
+    tracker = get_tracker(tracker_id)
     if tracker:
         tracker.unpause()
 
@@ -148,18 +164,18 @@ def unpause_tracker(tracker: Tracker):
 
 
 def sub_tracker(f):
-    async def decorator(id: int, websocket: WebSocket):
+    async def decorator(tracker_id: int, websocket: WebSocket):
         try:
-            if id not in trackers:
+            if tracker_id not in trackers:
                 await websocket.close(405)
                 return
             await websocket.accept()
             channel = redis.pubsub()
-            channel.subscribe(id)
-            while websocket.client_state == WebSocketState.CONNECTED and id in trackers:
+            channel.subscribe(tracker_id)
+            while websocket.client_state == WebSocketState.CONNECTED and tracker_id in trackers:
                 msg = channel.get_message()
                 if msg is not None:
-                    await f(msg, id, websocket)
+                    await f(msg, tracker_id, websocket)
                 await asyncio.sleep(0.01)
         except (WebSocketDisconnect, ConnectionClosedOK,
                 ConnectionClosedError) as e:
@@ -167,52 +183,59 @@ def sub_tracker(f):
         except ConnectionClosedOK as e:
             logger.info("Client disconnected with OK" + str(e))
 
-
-
     return decorator
 
 
-@app.websocket("/ws/stream/{id}")
+@app.websocket("/ws/stream/{tracker_id}")
 @sub_tracker
-async def get_stream(msg, id: int, websocket: WebSocket):
+async def get_stream(msg, tracker_id: int, websocket: WebSocket):
     if msg['type'] == 'message':
-        s = redis.hget('jpg', id)
+        s = redis.hget('jpg', tracker_id)
         if s:
             s = base64.b64decode(s)
             await websocket.send_bytes(s)
 
 
-@app.websocket("/ws/info/{id}")
+@app.websocket("/ws/info/{tracker_id}")
 @sub_tracker
-async def get_info(msg, id: int, websocket: WebSocket):
+async def get_info(msg, tracker_id: int, websocket: WebSocket):
     if msg['type'] == 'subscribe':
         print('subscribe to channel')
-        s = redis.hgetall(id)
+        s = redis.hgetall(tracker_id)
         w = [x.decode('utf-8') for x in s.values()]
         await websocket.send_text(f"[{','.join(w)}]")
     elif msg['type'] == 'message':
         frame_id = int(msg['data'])
-        result_json = f"[{redis.hget(id, frame_id).decode('utf-8')}]"
+        result_json = f"[{redis.hget(tracker_id, frame_id).decode('utf-8')}]"
         print(result_json)
         await websocket.send_text(result_json)
 
 
-@app.get("/stream/{id}")
-def video_feed(id: int, request: Request):
+@app.get("/stream/{tracker_id}")
+def video_feed(tracker_id: int, request: Request):
     return templates.TemplateResponse("stream.html", {
         "request": request,
-        "id": id
+        "tracker_id": tracker_id
     })
 
 
-@app.get("/info/{id}")
-def info_feed(id: int, request: Request):
+@app.get("/info/{tracker_id}")
+def info_feed(tracker_id: int, request: Request):
     return templates.TemplateResponse("info.html", {
         "request": request,
-        "id": id
+        "tracker_id": tracker_id
     })
 
 
-@app.get("/download/{id}")
-def download(id: str):
-    return FileResponse(f"./out/{id}")
+@app.get("/list_downloads")
+def list_downloads():
+    mypath = '/app/store/out/'
+    return [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f)) and f.endswith('.mp4')]
+
+
+@app.get("/download/{tracker_id}")
+def download(tracker_id: str):
+    file_path = f"/app/store/out/{tracker_id}"
+    if os.path.isfile(file_path):
+        return FileResponse(path=file_path, filename=os.path.basename(file_path), media_type='application/octet-stream')
+    raise HTTPException(status_code=404, detail="Item not found")

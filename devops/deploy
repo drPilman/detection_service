@@ -1,4 +1,0 @@
-#!/bin/bash
-cd /home/drpilman/Code/python/detection_service/
-git pull
-docker-compose up --build
