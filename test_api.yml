@@ -1,13 +1,16 @@
 version: "3.9"
 services:
+
   redis:
     extends:
       file: test.yml
       service: redis
+
   controller:
     extends:
       file: test.yml
       service: controller
+
   pytest:
     image: drpilman/testapi
     build:
