@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import {useParams} from "react-router-dom"
+import base_url from "../../api/base_url";
 
 const Info = (props) => {
     const params = useParams()
     let [infoObj, setInfoObj] = useState([])
 
     useEffect(async () => {
-        let ws = new WebSocket(`ws://127.0.0.1:8000/ws/info/${params.streamId}`)
+        let ws = new WebSocket('ws://'+base_url+`/ws/info/${params.streamId}`)
         ws.onmessage = (event) => {
             const arr = JSON.parse(event.data).sort((a, b) => a.frame - b.frame)
             setInfoObj([...infoObj, arr[0]])
