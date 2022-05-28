@@ -8,7 +8,7 @@ services:
       - "6379:6379"
     healthcheck:
       test: redis-cli ping | grep PONG
-      interval: 0.5s
+      interval: 1s
       timeout: 3s
       retries: 10
 
