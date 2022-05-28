@@ -1,11 +1,11 @@
 import React from 'react'
-import {connect} from "react-redux"
 import {Route, Routes} from 'react-router-dom'
 import './App.css';
 import Main from "./components/Main/Main";
 import Video from "./components/Video/Video"
 import Header from "./components/Header/Header";
 import Info from "./components/Info/Info";
+import ListDownloads from "./components/ListDownloads/ListDownloads";
 
 
 const App = (props) => {
@@ -16,18 +16,11 @@ const App = (props) => {
             <Routes>
                 <Route path={':streamId'} element={<Video /> } />
                 <Route path={'info/:streamId'} element={<Info /> } />
+                <Route path={'list_downloads'} element={<ListDownloads /> } />
                 <Route path={'*'} element={<Main/>}/>
             </Routes>
         </div>
     )
 }
 
-const mapStateToProps = (state) => ({
-
-})
-
-const mapDispatchToPropsObj = {
-
-}
-
-export default connect(mapStateToProps, mapDispatchToPropsObj)(App)
+export default App

@@ -1,0 +1,47 @@
+main {
+  font-size: 1.25rem;
+  padding: 2em 10em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  table {
+    background-color: #2da0c0;
+    border-radius: 0.5em;
+    border-spacing: 0;
+
+    thead {
+      tr {
+        td {
+          color: #f1f1f1;
+          text-align: center;
+          padding: 0.5em;
+        }
+      }
+    }
+
+    tbody {
+      font-size: 0.8em;
+      tr {
+        td {
+          color: #f1f1f1;
+          text-align: center;
+          padding: 0.5em 0.25em;
+          border-top: 0.1em solid #c2c2c2;
+
+          button {
+            border: 0;
+            border-radius: 0.25em;
+            padding: 0.5em;
+            font-size: 0.9em;
+          }
+        }
+      }
+    }
+
+  }
+
+  button {
+    width: max-content;
+  }
+}

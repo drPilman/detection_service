@@ -8,7 +8,8 @@ const AddTrackerForm = (props) => {
         <form onSubmit={props.handleSubmit}>
             <Field component={'input'}
                    name={'addTrackerUrl'}
-                   placeholder={'enter url'}/>
+                   placeholder={'enter url'}
+                   required/>
             <button>Add Tracker</button>
 
         </form>

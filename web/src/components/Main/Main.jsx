@@ -9,6 +9,7 @@ import {initializeAppTC} from "./../../redux/app-reducer";
 import {useNavigate} from 'react-router-dom'
 import s from './Main.module.scss'
 import s1 from './../../common/button.module.scss'
+import AddTrackerFile from "../AddFileTracker/AddTrackerFile";
 
 
 const Main = (props) => {
@@ -19,7 +20,7 @@ const Main = (props) => {
     const navigate = useNavigate()
 
     let trackersC = props.trackers.map(
-        tracker => (<tr>
+        tracker => (<tr key={tracker.tracker_id}>
             <td>{tracker.tracker_id}</td>
             <td>{tracker.status}</td>
             <td><button onClick={() => {navigate('/'+tracker.tracker_id)}}
@@ -34,13 +35,15 @@ const Main = (props) => {
         </tr>)
     )
 
-    trackersC.push(<tr>
+    trackersC.push(<tr key='test'>
         <td></td>
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
-        <td></td>
+        <td><button onClick={() => {navigate('/list_downloads')}}
+                    className={s1.btn}>Download list</button>
+        </td>
+        <td>Update</td>
     </tr>)
     return (
         <main>
@@ -60,6 +63,7 @@ const Main = (props) => {
                 </tbody>
             </table>
             <AddTracker/>
+            <AddTrackerFile/>
         </main>
     )
 

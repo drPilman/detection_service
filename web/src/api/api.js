@@ -10,6 +10,12 @@ export const frontAPI = {
     addTracker(rtsp_url) {
         return instance.post('http://' + base_url + '/add_tracker', { rtsp_url })
     },
+    addTrackerFile(video) {
+        let formData = new FormData()
+        formData.append('video', video)
+
+        return instance.post('http://' + base_url + '/add_file_tracker', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+    },
     listTrackers() {
         return instance.get('http://' + base_url + `/list_trackers`)
     },
@@ -21,6 +27,9 @@ export const frontAPI = {
     },
     unpauseTracker(tracker_id) {
         return instance.post('http://' + base_url + `/unpause_tracker`, { tracker_id })
-    }
+    },
+    listDownloads() {
+        return instance.get('http://' + base_url + `/list_downloads`)
+    },
 }
 
