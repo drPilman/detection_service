@@ -17,4 +17,5 @@ services:
       context: controller/tests
     network_mode: "host"
     depends_on:
-      - controller
+      controller:
+        condition: service_healthy

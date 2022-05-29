@@ -3,7 +3,7 @@
 - [docker compose](https://github.com/docker/compose)
 - [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (if not for test)
 
-# Install
+# Build
 ```bash
 docker compose -f build.yml build
 ```
@@ -18,12 +18,14 @@ docker compose up
 docker compose -f build.test.yml build
 ```
 run test service (light detector)
-```
-docker compose -f test.yml up
+```bash
+docker compose -f test.yml up --build
 ```
 
-run pytest 
+run single pytest 
 
 ```bash
 docker compose -f test_api.yml run pytest
 ```
+# NOTE
+if you use `sudo`, you should change `STORE_PATH=${PWD}/store` to abs path dir `store` of this project, because ${PWD} in sudo mode don't return this path.
