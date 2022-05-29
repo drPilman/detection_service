@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 import redis as Redis
 import json
+import signal
+import shutil
 
 
 class Timer:
@@ -33,10 +35,21 @@ timer = Timer()
 
 
 def detect(opt):
+    os.makedirs('/mount/out/')
+    shutil.move('test.mp4', '/mount/out/test.mp4')
+
+    def handler(signum, frame):
+        print('handler!!!!!!!!')
+        fp = open('/mount/ok', 'x')
+        fp.close()
+        exit(signum)
+
     redis_id = opt.redis_id
     i = 0
     frame_idx = -1
     while frame_idx < 1000:
+        if frame_idx == 0:
+            signal.signal(signal.SIGTERM, handler)
         frame_idx += 1
         timer()
         i = (i + 1) % 2
@@ -51,8 +64,7 @@ def detect(opt):
         conf = 0.78
         bboxes = [1, 2, 3, 4]
         result.append(
-            (int(id), names[int(cls)], float(conf),
-             list(map(float, bboxes))))
+            (int(id), names[int(cls)], float(conf), list(map(float, bboxes))))
 
         print(f'Done. ({timer():.3f}s)')
         jpg_as_text = base64.b64encode(img)
@@ -64,8 +76,8 @@ def detect(opt):
                    }))
         redis.hset('jpg', redis_id, jpg_as_text)
         redis.publish(redis_id, frame_idx)
-
-
+    fp = open('/mount/ok', 'x')
+    fp.close()
 
 
 if __name__ == '__main__':
@@ -157,6 +169,9 @@ if __name__ == '__main__':
     parser.add_argument('--exist-ok',
                         action='store_true',
                         help='existing project/name ok, do not increment')
+    parser.add_argument('--project',
+                        default='/mount/out',
+                        help='save results to project/name')
     parser.add_argument('--redis-id',
                         default=0,
                         help='redis id to save result')

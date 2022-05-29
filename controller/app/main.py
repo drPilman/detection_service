@@ -16,16 +16,29 @@ from log import log_config
 import base64
 import redis as Redis
 import os
-import glob
+from shutil import rmtree
 
+logging.config.dictConfig(log_config)
+logger = logging.getLogger("main")
+
+storepath = os.environ["STORE_PATH"]
 detector = os.environ["DETECTOR_IMAGE"]
-device = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])] if os.environ["DEVICE"] == 'gpu' else []
+device = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])
+          ] if os.environ["DEVICE"] == 'gpu' else []
+
 redis = Redis.Redis(host=os.environ["REDIS_HOST"], port=6379, db=0)
 redis.flushall()  # <====================== not deploy me!!!!!!!!!!!!!!!!
 redis.set('tracker:uniq', 1000)
-templates = Jinja2Templates(directory="templates")
 
-logging.config.dictConfig(log_config)
+store = '/app/store/'
+for f in os.listdir(store):
+    ff = os.path.join(store, f)
+    if os.path.isdir(ff):
+        rmtree(ff)
+    else:
+        os.remove(ff)
+
+templates = Jinja2Templates(directory="templates")
 
 
 class Rdict(dict):
@@ -46,7 +59,6 @@ class Rdict(dict):
 trackers = Rdict()
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-logger = logging.getLogger("main")
 
 # origins = ["http://localhost:3000", "http://0.0.0.0:3000","http://127.0.0.1:3000"]
 origins = [
@@ -80,40 +92,68 @@ def health_check():
 @app.post('/add_tracker')
 def add_tracker(rtsp_url: str = Body(..., embed=True)):
     tracker_id = redis.incr('tracker:uniq')
+    os.makedirs(os.path.join(store, str(tracker_id)))
     # docker run --rm --net="host" --gpus=all drpilman/detector rtsp://127.0.0.1:8554/mystream
-    container = client.containers.run(detector,
-                                      f"{rtsp_url} --redis-id {tracker_id}",
-                                      network_mode="host",
-                                      detach=True,
-                                      auto_remove=True,
-                                      device_requests=device)
+    container = client.containers.run(
+        detector,
+        f"{rtsp_url} --redis-id {tracker_id} --project /mount --name out --save-vid",
+        network_mode="host",
+        detach=True,
+        auto_remove=True,
+        mounts=[
+            docker.types.Mount(f'/mount/',
+                               os.path.join(storepath, str(tracker_id)),
+                               type='bind'),
+        ],
+        device_requests=device)
     # logs = container.logs(stream=True)
     # for s in logs:
     #    print(s)
     trackers[tracker_id] = container.id
-    return {
-        'tracker_id': tracker_id,
-        'status': container.status
-    }
+    return {'tracker_id': tracker_id, 'status': container.status}
 
 
 @app.post('/add_tracker_file')
 async def upload(file: UploadFile = File(...)):
+    if not file.filename.endswith('.mp4'):
+        raise HTTPException(status_code=403,
+                            detail="You can upload only .mp4 files")
+
+    tracker_id = redis.incr('tracker:uniq')
+    path = os.path.join(store, str(tracker_id), file.filename)
     try:
+        os.makedirs(os.path.join(store, str(tracker_id)))
         contents = await file.read()
-        with open(f'/app/store/in/{file.filename}', 'wb') as f:
+        with open(path, 'wb') as f:
             f.write(contents)
     except Exception as e:
-        raise HTTPException(status_code=402, detail=f"There was an error uploading the file: {e}")
+        raise HTTPException(
+            status_code=405,
+            detail=f"There was an error uploading the file: {e}")
     finally:
         await file.close()
-    return {"message": f"Successfully uploaded {file.filename}"}
+
+    container = client.containers.run(
+        detector,
+        f"/mount/{file.filename} --redis-id {tracker_id} --project /mount --name out --save-vid",
+        network_mode="host",
+        detach=True,
+        auto_remove=True,
+        mounts=[
+            docker.types.Mount(f'/mount/',
+                               os.path.join(storepath, str(tracker_id)),
+                               type='bind'),
+        ],
+        device_requests=device)
+
+    trackers[tracker_id] = container.id
+    return {'tracker_id': tracker_id, 'status': container.status}
 
 
 @app.get('/list_trackers')
 def list_trackers():
-    containers = client.containers.list(
-        all=True, filters={"ancestor": detector})
+    containers = client.containers.list(all=True,
+                                        filters={"ancestor": detector})
     return [{
         'tracker_id': trackers.r[container.id],
         'status': container.status
@@ -141,7 +181,7 @@ def tracker_info(tracker_id: int):
 def remove_tracker(tracker_id: int = Body(..., embed=True)):
     tracker_container = get_tracker(tracker_id)
     if tracker_container:
-        tracker_container.remove(force=True)
+        tracker_container.stop()
         del trackers[tracker_id]
 
 
@@ -164,6 +204,7 @@ def unpause_tracker(tracker_id: int = Body(..., embed=True)):
 
 
 def sub_tracker(f):
+
     async def decorator(tracker_id: int, websocket: WebSocket):
         try:
             if tracker_id not in trackers:
@@ -177,8 +218,7 @@ def sub_tracker(f):
                 if msg is not None:
                     await f(msg, tracker_id, websocket)
                 await asyncio.sleep(0.01)
-        except (WebSocketDisconnect, ConnectionClosedOK,
-                ConnectionClosedError) as e:
+        except (WebSocketDisconnect, ConnectionClosedError) as e:
             logger.info("Client disconnected" + str(e))
         except ConnectionClosedOK as e:
             logger.info("Client disconnected with OK" + str(e))
@@ -229,13 +269,22 @@ def info_feed(tracker_id: int, request: Request):
 
 @app.get("/list_downloads")
 def list_downloads():
-    mypath = '/app/store/out/'
-    return [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f)) and f.endswith('.mp4')]
+    max_tracker = int(redis.get('tracker:uniq')) + 1
+    inrange = lambda x, m=max_tracker: 1000 < int(x) < m
+    return [
+        f for f in os.listdir(store)
+        if os.path.isdir(os.path.join(store, f)) and f.isdecimal() and inrange(
+            f) and os.path.exists(os.path.join(store, f, 'ok'))  # it's ready
+    ]
 
 
 @app.get("/download/{tracker_id}")
 def download(tracker_id: str):
-    file_path = f"/app/store/out/{tracker_id}"
-    if os.path.isfile(file_path):
-        return FileResponse(path=file_path, filename=os.path.basename(file_path), media_type='application/octet-stream')
+    path = os.path.join(store, tracker_id, 'out')
+    name = os.listdir(path)[0]
+    file_path = os.path.join(path, name)
+    if os.path.isfile(file_path) and name.endswith('.mp4'):
+        return FileResponse(path=file_path,
+                            filename=name,
+                            media_type='application/octet-stream')
     raise HTTPException(status_code=404, detail="Item not found")

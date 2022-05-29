@@ -13,7 +13,6 @@ services:
     environment:
       - DETECTOR_IMAGE=drpilman/testdetector
       - DEVICE=cpu
-      - REDIS_HOST=redis
 
   web:
     extends:

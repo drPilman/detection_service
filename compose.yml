@@ -22,6 +22,7 @@ services:
       - DETECTOR_IMAGE=drpilman/detector
       - DEVICE=gpu
       - REDIS_HOST=redis
+      - STORE_PATH=${PWD}/store
     volumes:
       - ./store:/app/store
       - /var/run/docker.sock:/var/run/docker.sock
