@@ -9,17 +9,16 @@ class FileInput extends React.Component {
     onChange(e) {
         const { input: { onChange } } = this.props
         onChange(e.target.files[0])
+
     }
 
     render() {
-        const { input: { value } } = this.props
-
+        const {input: {value}} = this.props
         return (<input
             type="file"
-            value={value}
-            accept='.mp4, .avi'
             required
-            onChange={this.onChange}
+            accept='.mp4'
+            value={value}
         />)
     }
 }

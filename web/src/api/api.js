@@ -12,9 +12,9 @@ export const frontAPI = {
     },
     addTrackerFile(video) {
         let formData = new FormData()
-        formData.append('video', video)
+        formData.append('file', video)
 
-        return instance.post('http://' + base_url + '/add_file_tracker', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        return instance.post('http://' + base_url + '/add_tracker_file', formData, {headers: {'Content-Type': 'multipart/form-data'}})
     },
     listTrackers() {
         return instance.get('http://' + base_url + `/list_trackers`)

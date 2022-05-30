@@ -1,14 +1,19 @@
-import {frontAPI} from "../api/api";
+import {frontAPI} from "../api/api"
+import _ from 'lodash'
 
 const UPDATE_TRACKERS = 'UPDATE_TRACKERS'
 const TOGGLE_IS_FETCHING = 'TOGGLE_IS_FETCHING'
 const GET_LIST_DOWNLOADS = 'GET_LIST_DOWNLOADS'
+const UPDATE_INFO_TRACKERS = 'UPDATE_INFO_TRACKERS'
+const SET_SELECTED_VIDEO = 'SET_SELECTED_VIDEO'
 
 let initialState = {
     trackers: [
         {tracker_id: 1, status: 'test'}
     ],
+    infoTrackers: [],
     listDownloads: [],
+    selectedVideo: null,
     isFetching: false
 }
 
@@ -29,7 +34,22 @@ const appReducer = (state = initialState, action) => {
                 ...state,
                 listDownloads: [...action.listDownloads]
             }
+        case UPDATE_INFO_TRACKERS:
+            let newInfoTrackers = _.cloneDeep(state.infoTrackers)
+            for (let i in action.infoTrackers) {
+                newInfoTrackers.push(action.infoTrackers[i])
+            }
+            newInfoTrackers.sort((a, b) => (b.frame - a.frame))
 
+            return {
+                ...state,
+                infoTrackers: newInfoTrackers
+            }
+        case SET_SELECTED_VIDEO:
+            return {
+                ...state,
+                selectedVideo: action.video
+            }
         default:
             return state
     }
@@ -38,6 +58,8 @@ const appReducer = (state = initialState, action) => {
 const updateTrackersAC = (trackers) => ({type: UPDATE_TRACKERS, trackers})
 const getListDownloadsAC = (listDownloads) => ({type: GET_LIST_DOWNLOADS, listDownloads})
 const toggleIsFetchingAC = (isFetching) => ({type: TOGGLE_IS_FETCHING, isFetching})
+export const updateInfoTrackersAC = (infoTrackers) => ({type: UPDATE_INFO_TRACKERS, infoTrackers})
+export const setSelectedVideoAC = (video) => ({type: SET_SELECTED_VIDEO, video})
 
 const updateTracker =  (dispatch, errorText, status) => async () => {
     if (status === 200) {

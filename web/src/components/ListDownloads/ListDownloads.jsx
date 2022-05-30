@@ -7,21 +7,23 @@ import s1 from './../../common/button.module.scss'
 
 const ListDownloads = (props) => {
     //make upload list
-    useEffect(()=> {
-        props.getListDownloadsTC()
+    const getListDownloads = props.getListDownloadsTC
+
+    useEffect(async ()=> {
+        await getListDownloads()
     }, [])
 
     let downloadsC = props.listDownloads.map(
         item => (<tr key={item}>
             <td>{item}</td>
-            <td><button onClick={() => {window.open('/download/'+item, '_blank')}}
+            <td><button onClick={() => {window.open('http://127.0.0.1:8000/download/'+item, '_blank')}}
                         className={s1.btn}>Download</button></td>
         </tr>)
     )
 
     downloadsC.push(<tr key='test'>
         <td></td>
-        <td><button onClick={() => {props.getListDownloadsTC()}}
+        <td><button onClick={getListDownloads}
                     className={s1.btn}>Update</button>
         </td>
     </tr>)

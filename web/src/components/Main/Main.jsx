@@ -10,6 +10,7 @@ import {useNavigate} from 'react-router-dom'
 import s from './Main.module.scss'
 import s1 from './../../common/button.module.scss'
 import AddTrackerFile from "../AddFileTracker/AddTrackerFile";
+import UpdateTrackers from "../UpdateTrackers/UpdateTrackers";
 
 
 const Main = (props) => {
@@ -43,7 +44,7 @@ const Main = (props) => {
         <td><button onClick={() => {navigate('/list_downloads')}}
                     className={s1.btn}>Download list</button>
         </td>
-        <td>Update</td>
+        <td><UpdateTrackers/></td>
     </tr>)
     return (
         <main>
