@@ -42,6 +42,6 @@ services:
     build:
       context: web
       args:
-        API_HOST: 127.0.0.1:8000
+        API_URL: '${API_HOST:-127.0.0.1}:8000'
     ports:
-      - "3000:3000"
+      - "80:3000"

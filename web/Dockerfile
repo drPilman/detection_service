@@ -4,10 +4,9 @@ COPY package.json .
 RUN npm install --only=prod
 COPY public public
 COPY src src
-ARG API_HOST
-RUN echo "export default '$API_HOST'" > /app/src/api/base_url.js
-RUN npm run build
-#&& npm install -g serve
+ARG API_URL
+RUN echo "export default '$API_URL'" > /app/src/api/base_url.js
+RUN npm run build && npm install -g serve
 EXPOSE 3000
-#CMD serve -s build
-CMD ["npm", "start"]
+CMD serve -s build
+#CMD ["npm", "start"]
