@@ -3,18 +3,18 @@ services:
 
   redis:
     extends:
-      file: test.yml
+      file: compose.yml
       service: redis
 
   controller:
     extends:
-      file: test.yml
+      file: compose.yml
       service: controller
 
-  pytest:
-    image: drpilman/testapi
+  test_full:
+    image: drpilman/test_full
     build:
-      context: controller/tests
+      context: test/full
     network_mode: "host"
     depends_on:
       controller:

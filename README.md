@@ -20,20 +20,30 @@ docker compose up
 
 ## Test
 
+Build light detector
+
 ```bash
 docker compose -f build.test.yml build
 ```
 
-run test service (light detector)
+run full service (with light detector)
 
 ```bash
 docker compose -f test.yml up --build
 ```
 
-run single pytest
+run single lightest (with light detector)
 
 ```bash
-docker compose -f test_api.yml run pytest
+docker compose -f test.light.yml build
+docker compose -f test.light.yml run test_light
+```
+
+run single fulltest (with detector)
+
+```bash
+docker compose -f test.light.yml build
+docker compose -f test.light.yml run test_light
 ```
 
 ## NOTE

@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt --no-cache-dir
 
-COPY . .
+COPY src .
 
 CMD ["pytest"]
 

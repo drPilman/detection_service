@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+
+  redis:
+    extends:
+      file: test.yml
+      service: redis
+
+  controller:
+    extends:
+      file: test.yml
+      service: controller
+
+  test_light:
+    image: drpilman/test_light
+    build:
+      context: controller/tests
+    network_mode: "host"
+    depends_on:
+      controller:
+        condition: service_healthy

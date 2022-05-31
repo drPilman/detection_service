@@ -1,4 +1,3 @@
-from operator import indexOf
 import requests
 import asyncio
 import websockets
@@ -15,7 +14,6 @@ import json
 
 #with open('test_json.json', 'w') as file:
 #    json.dump(data_json, file)
- 
 
 
 def url(s):
@@ -34,7 +32,8 @@ def test_empty_list():
 
 
 def test_add_tracker():
-    response = requests.post(url=url("/add_tracker_file"), files={'file': open('test_video.mp4', 'rb')})
+    response = requests.post(url=url("/add_tracker_file"),
+                             files={'file': open('test_video.mp4', 'rb')})
     data = response.json()
     tracker_id, status = data['tracker_id'], data['status']
 
@@ -48,8 +47,7 @@ def test_add_tracker():
     assert data[0]["tracker_id"] == tracker_id
     assert data[0]["status"] == "running"
 
-    requests.post(url("/pause_tracker"),
-                  json={"tracker_id": tracker_id})
+    requests.post(url("/pause_tracker"), json={"tracker_id": tracker_id})
     response = requests.get(url("/list_trackers"))
 
     assert response.status_code == 200
@@ -74,25 +72,28 @@ async def test_tracker_info():
     test_json = json.load(open('test_json.json'))
     cur_json = {'items': []}
 
-    response = requests.post(url=url("/add_tracker_file"), files={'file': open('test_video.mp4', 'rb')})
-    data = response.json() 
+    response = requests.post(url=url("/add_tracker_file"),
+                             files={'file': open('test_video.mp4', 'rb')})
+    data = response.json()
     tracker_id, status = data['tracker_id'], data['status']
 
     assert response.status_code == 200
     assert status == 'created'
-    
-    async with websockets.connect(f"ws://127.0.0.1:8000/ws/info/{tracker_id}") as websocket:
+
+    async with websockets.connect(
+            f"ws://127.0.0.1:8000/ws/info/{tracker_id}") as websocket:
         msg = await websocket.recv()
         assert msg == "[]"
 
-        cnt_frames = test_json['items'][len(test_json['items']) - 1]['frame'] + 1
+        cnt_frames = test_json['items'][len(test_json['items']) -
+                                        1]['frame'] + 1
         for i in range(cnt_frames):
             msg = await websocket.recv()
             item = json.loads(msg)[0]
             if item['data']:
                 cur_json["items"].append(item)
         await websocket.close()
-       
+
     assert test_json == cur_json
 
     requests.post(url("/remove_tracker"), json={"tracker_id": tracker_id})
@@ -100,7 +101,3 @@ async def test_tracker_info():
 
     assert response.status_code == 200
     assert response.json() == []
-    
-#asyncio.run(test_tracker_info())
-
-
