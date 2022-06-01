@@ -14,7 +14,7 @@ services:
   test_light:
     image: drpilman/test_light
     build:
-      context: controller/tests
+      context: test/light
     network_mode: "host"
     depends_on:
       controller:
